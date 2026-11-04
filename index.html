@@ -702,10 +702,46 @@
          * Created exclusively for Dennis.
          */
 
-        // Web Audio Synthesizer (UI SFX)
+        // Web Audio Synthesizer (UI SFX) & Global Audio Analyzer Setup
         class SoundFX {
-            constructor() { this.ctx = null; }
-            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+            constructor() { 
+                this.ctx = null; 
+                this.analyser = null;
+                this.dataArray = null;
+                this.source = null;
+            }
+            init() { 
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+            setupAudioAnalyser(audioElement) {
+                this.init();
+                if (!this.analyser && this.ctx) {
+                    try {
+                        this.analyser = this.ctx.createAnalyser();
+                        this.analyser.fftSize = 64;
+                        this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+                        this.source = this.ctx.createMediaElementSource(audioElement);
+                        this.source.connect(this.analyser);
+                        this.analyser.connect(this.ctx.destination);
+                    } catch(e) {
+                        console.log("Audio node connection managed or already connected.", e);
+                    }
+                }
+            }
+            getAudioEnergy() {
+                if (!this.analyser || !this.dataArray) return 0;
+                this.analyser.getByteFrequencyData(this.dataArray);
+                let sum = 0;
+                for (let i = 0; i < this.dataArray.length; i++) {
+                    sum += this.dataArray[i];
+                }
+                return sum / this.dataArray.length; // Retorna promedio de energía (0 a 255)
+            }
             playTone(freq, type = 'sine', duration = 0.15) {
                 if (!this.ctx) return;
                 try {
@@ -823,6 +859,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
                 stars.push({
                     x: Math.random() * width,
                     y: Math.random() * height,
+                    baseSize: Math.random() * 2.2,
                     size: Math.random() * 2.2,
                     alpha: Math.random(),
                     speed: Math.random() * 0.02 + 0.005
@@ -864,35 +901,52 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
         function animateCanvas() {
             bgCtx.clearRect(0, 0, width, height);
 
-            // Ambient Nebula Glow
-            const grad1 = bgCtx.createRadialGradient(width * 0.25, height * 0.35, 50, width * 0.25, height * 0.35, 450);
-            grad1.addColorStop(0, state.theme === 'dark' ? 'rgba(157, 78, 221, 0.18)' : 'rgba(255, 204, 213, 0.25)');
+            // Obtener nivel de energía del audio para la reactividad del fondo
+            const audioEnergy = (state.audioPlaying && sfx.analyser) ? sfx.getAudioEnergy() : 0;
+            const energyNorm = audioEnergy / 255; // Normalizado de 0 a 1
+
+            // Dynamic Nebula Ambient Glow reaccionando al pulso de la música
+            const baseNebulaRadius = 450;
+            const dynamicRadius = baseNebulaRadius + (energyNorm * 200);
+            const nebulaAlpha = state.theme === 'dark' 
+                ? 0.18 + (energyNorm * 0.25) 
+                : 0.25 + (energyNorm * 0.2);
+
+            const grad1 = bgCtx.createRadialGradient(width * 0.25, height * 0.35, 50, width * 0.25, height * 0.35, dynamicRadius);
+            grad1.addColorStop(0, state.theme === 'dark' ? `rgba(157, 78, 221, ${nebulaAlpha})` : `rgba(255, 204, 213, ${nebulaAlpha})`);
+            grad1.addColorStop(0.5, state.theme === 'dark' ? `rgba(255, 0, 127, ${nebulaAlpha * 0.5})` : `rgba(255, 117, 143, ${nebulaAlpha * 0.5})`);
             grad1.addColorStop(1, 'transparent');
             bgCtx.fillStyle = grad1;
             bgCtx.fillRect(0, 0, width, height);
 
-            // Render Stars
+            // Render Stars reaccionando en tamaño y destello según el ritmo de la música
             stars.forEach(star => {
                 star.alpha += star.speed;
                 if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
-                bgCtx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                
+                // Las estrellas pulsan y aumentan de tamaño con los bajos de la canción
+                const currentSize = star.baseSize + (energyNorm * star.baseSize * 1.8);
+                const currentAlpha = Math.min(1, Math.abs(star.alpha) + (energyNorm * 0.4));
+
+                bgCtx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`;
                 bgCtx.beginPath();
-                bgCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                bgCtx.arc(star.x, star.y, currentSize, 0, Math.PI * 2);
                 bgCtx.fill();
             });
 
-            // Shooting Stars
-            if (Math.random() < 0.02) {
+            // Shooting Stars aumentan la frecuencia en picos de música
+            const shootingStarThreshold = 0.02 + (energyNorm * 0.05);
+            if (Math.random() < shootingStarThreshold) {
                 shootingStars.push({
                     x: Math.random() * width,
                     y: Math.random() * height * 0.5,
-                    length: Math.random() * 90 + 40,
-                    speed: Math.random() * 11 + 6,
+                    length: Math.random() * 90 + 40 + (energyNorm * 50),
+                    speed: Math.random() * 11 + 6 + (energyNorm * 8),
                     alpha: 1
                 });
             }
 
-            bgCtx.lineWidth = 2;
+            bgCtx.lineWidth = 2 + (energyNorm * 2);
             for (let i = shootingStars.length - 1; i >= 0; i--) {
                 let st = shootingStars[i];
                 st.x += st.speed;
@@ -1262,7 +1316,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             renderConstellations();
         });
 
-        // APP 3: AUDIO SANCTUARY ENGINE
+        // APP 3: AUDIO SANCTUARY ENGINE (Optimizado con Web Audio Analyser para Reactividad de Fondo)
         const audio = document.getElementById('audioSource');
         const mainPlayBtn = document.getElementById('mainPlayBtn');
         const hudPlayBtn = document.getElementById('hudPlayBtn');
@@ -1276,12 +1330,16 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
 
         function toggleAudio() {
             sfx.click();
+            sfx.setupAudioAnalyser(audio);
+
             if (audio.paused) {
                 audio.play().then(() => {
                     state.audioPlaying = true;
                     updateAudioUI(true);
-                }).catch(() => {
-                    showNotification("Audio Player", "Cargando 'Stay With Me' para Dennis...");
+                    showNotification("Reproduciendo", "Stay With Me • Miki Matsubara");
+                }).catch((err) => {
+                    console.error("Error al reproducir audio:", err);
+                    showNotification("Aviso de Audio", "Toca el botón de reproducción nuevamente para iniciar la música.");
                 });
             } else {
                 audio.pause();
@@ -1308,8 +1366,11 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
         function jumpToSixtySec() {
             sfx.click();
             audio.currentTime = 60;
-            if (audio.paused) toggleAudio();
-            showNotification("Audio Sanctuary", "Saltando al segundo 60 (1:00) • Miki Matsubara");
+            if (audio.paused) {
+                toggleAudio();
+            } else {
+                showNotification("Audio Sanctuary", "Saltando al segundo 60 (1:00)");
+            }
         }
         jumpSixtySecBtn.addEventListener('click', jumpToSixtySec);
         hudJumpBtn.addEventListener('click', jumpToSixtySec);
@@ -1327,13 +1388,22 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             document.getElementById('hudTime').textContent = formatted;
         });
 
+        audio.addEventListener('error', (e) => {
+            console.error("Error en archivo de audio:", e);
+            showNotification("Error de Audio", "No se pudo cargar el archivo desde GitHub. Verifica la conexión.");
+        });
+
         mainSeekbar.addEventListener('input', (e) => {
-            const seekTime = (e.target.value / 100) * audio.duration;
-            audio.currentTime = seekTime;
+            if (audio.duration) {
+                const seekTime = (e.target.value / 100) * audio.duration;
+                audio.currentTime = seekTime;
+            }
         });
         hudSeekbar.addEventListener('input', (e) => {
-            const seekTime = (e.target.value / 100) * audio.duration;
-            audio.currentTime = seekTime;
+            if (audio.duration) {
+                const seekTime = (e.target.value / 100) * audio.duration;
+                audio.currentTime = seekTime;
+            }
         });
 
         // Spectrum Equalizer Canvas
@@ -1342,10 +1412,20 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             const bars = 28;
             const barWidth = visualizerCanvas.width / bars;
 
-            for (let i = 0; i < bars; i++) {
-                let h = state.audioPlaying ? Math.random() * (visualizerCanvas.height - 12) + 6 : 4;
-                visCtx.fillStyle = state.theme === 'dark' ? '#ff007f' : '#ff758f';
-                visCtx.fillRect(i * barWidth + 2, visualizerCanvas.height - h, barWidth - 3, h);
+            if (state.audioPlaying && sfx.analyser && sfx.dataArray) {
+                sfx.analyser.getByteFrequencyData(sfx.dataArray);
+                for (let i = 0; i < bars; i++) {
+                    let val = sfx.dataArray[i % sfx.dataArray.length];
+                    let h = (val / 255) * (visualizerCanvas.height - 8) + 4;
+                    visCtx.fillStyle = state.theme === 'dark' ? '#ff007f' : '#ff758f';
+                    visCtx.fillRect(i * barWidth + 2, visualizerCanvas.height - h, barWidth - 3, h);
+                }
+            } else {
+                for (let i = 0; i < bars; i++) {
+                    let h = 4;
+                    visCtx.fillStyle = state.theme === 'dark' ? '#ff007f' : '#ff758f';
+                    visCtx.fillRect(i * barWidth + 2, visualizerCanvas.height - h, barWidth - 3, h);
+                }
             }
             requestAnimationFrame(renderVisualizer);
         }
