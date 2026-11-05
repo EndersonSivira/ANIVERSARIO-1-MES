@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dennis OS • 1-Month Anniversary Edition</title>
    
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -59,8 +60,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FontAwesome Icons (Corregido con protocolo https seguro para GitHub Pages) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <style>
         /* Custom Scrollbar Styles */
@@ -692,7 +693,7 @@
     <!-- NOTIFICATION TOAST CONTAINER -->
     <div id="toastContainer" class="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-50 flex flex-col space-y-2 pointer-events-none max-w-[calc(100vw-2rem)]"></div>
 
-    <!-- AUDIO SOURCE ENGINE -->
+    <!-- AUDIO SOURCE ENGINE (Con HTTPS estricto para evitar bloqueos en GitHub Pages) -->
     <audio id="audioSource" src="https://github.com/EndersonSivira/Poema-para-girlfriend/raw/main/Miki%20Matsubara%20-%20Stay%20With%20Me%20(Lyrics%20Espa%C3%B1ol)(M4A_128K).m4a" crossorigin="anonymous" preload="auto"></audio>
 
     <!-- CORE SYSTEM SCRIPT -->
@@ -740,7 +741,7 @@
                 for (let i = 0; i < this.dataArray.length; i++) {
                     sum += this.dataArray[i];
                 }
-                return sum / this.dataArray.length; // Retorna promedio de energía (0 a 255)
+                return sum / this.dataArray.length;
             }
             playTone(freq, type = 'sine', duration = 0.15) {
                 if (!this.ctx) return;
@@ -901,11 +902,9 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
         function animateCanvas() {
             bgCtx.clearRect(0, 0, width, height);
 
-            // Obtener nivel de energía del audio para la reactividad del fondo
             const audioEnergy = (state.audioPlaying && sfx.analyser) ? sfx.getAudioEnergy() : 0;
-            const energyNorm = audioEnergy / 255; // Normalizado de 0 a 1
+            const energyNorm = audioEnergy / 255;
 
-            // Dynamic Nebula Ambient Glow reaccionando al pulso de la música
             const baseNebulaRadius = 450;
             const dynamicRadius = baseNebulaRadius + (energyNorm * 200);
             const nebulaAlpha = state.theme === 'dark' 
@@ -919,12 +918,10 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             bgCtx.fillStyle = grad1;
             bgCtx.fillRect(0, 0, width, height);
 
-            // Render Stars reaccionando en tamaño y destello según el ritmo de la música
             stars.forEach(star => {
                 star.alpha += star.speed;
                 if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
                 
-                // Las estrellas pulsan y aumentan de tamaño con los bajos de la canción
                 const currentSize = star.baseSize + (energyNorm * star.baseSize * 1.8);
                 const currentAlpha = Math.min(1, Math.abs(star.alpha) + (energyNorm * 0.4));
 
@@ -934,7 +931,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
                 bgCtx.fill();
             });
 
-            // Shooting Stars aumentan la frecuencia en picos de música
             const shootingStarThreshold = 0.02 + (energyNorm * 0.05);
             if (Math.random() < shootingStarThreshold) {
                 shootingStars.push({
@@ -966,7 +962,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
                 if (st.alpha <= 0) shootingStars.splice(i, 1);
             }
 
-            // Foreground Interactive FX
             fxCtx.clearRect(0, 0, width, height);
             for (let i = cursorParticles.length - 1; i >= 0; i--) {
                 let p = cursorParticles[i];
@@ -1041,7 +1036,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             document.getElementById('lockDate').textContent = dateStr;
             document.getElementById('osClock').textContent = timeStr;
 
-            // Anniversary Counter
             const diff = now - state.anniversaryStartDate;
             if (diff > 0) {
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -1134,7 +1128,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             let startX, startY, initialX, initialY;
 
             header.addEventListener('mousedown', (e) => {
-                if (window.innerWidth <= 768) return; // Disable dragging on small mobile screens
+                if (window.innerWidth <= 768) return;
                 isDragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
@@ -1226,7 +1220,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
         function renderConstellations() {
             svgMap.innerHTML = '';
 
-            // Lines
             for (let i = 0; i < state.constellations.length - 1; i++) {
                 const c1 = state.constellations[i];
                 const c2 = state.constellations[i + 1];
@@ -1241,7 +1234,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
                 svgMap.appendChild(line);
             }
 
-            // Stars
             state.constellations.forEach(c => {
                 const isUnlocked = state.unlockedConstellations.has(c.id);
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -1316,7 +1308,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             renderConstellations();
         });
 
-        // APP 3: AUDIO SANCTUARY ENGINE (Optimizado con Web Audio Analyser para Reactividad de Fondo)
+        // APP 3: AUDIO SANCTUARY ENGINE (Optimizado con Web Audio Analyser y manejo robusto de promesas)
         const audio = document.getElementById('audioSource');
         const mainPlayBtn = document.getElementById('mainPlayBtn');
         const hudPlayBtn = document.getElementById('hudPlayBtn');
@@ -1575,18 +1567,15 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
         const explodeLegoBtn = document.getElementById('explodeLegoBtn');
 
         let legoExploded = false;
-        let legoExplodeProgress = 0; // 0 = assembled, 1 = exploded
+        let legoExplodeProgress = 0;
         let legoDebris = [];
         let legoHovering = false;
 
-        // Grid-based Lego Heart voxels layout (Isometric Layer Engine)
         const heartGrid = [
-            // Row 0
             { gridX: -2, gridY: -3, gridZ: 0, color: '#e6005c' },
             { gridX: -1, gridY: -3, gridZ: 0, color: '#ff007f' },
             { gridX: 1,  gridY: -3, gridZ: 0, color: '#ff007f' },
             { gridX: 2,  gridY: -3, gridZ: 0, color: '#e6005c' },
-            // Row 1
             { gridX: -3, gridY: -2, gridZ: 0, color: '#c9184a' },
             { gridX: -2, gridY: -2, gridZ: 0, color: '#ff2a85' },
             { gridX: -1, gridY: -2, gridZ: 0, color: '#ff007f' },
@@ -1594,7 +1583,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             { gridX: 1,  gridY: -2, gridZ: 0, color: '#ff007f' },
             { gridX: 2,  gridY: -2, gridZ: 0, color: '#ff2a85' },
             { gridX: 3,  gridY: -2, gridZ: 0, color: '#c9184a' },
-            // Row 2
             { gridX: -3, gridY: -1, gridZ: 0, color: '#a71d31' },
             { gridX: -2, gridY: -1, gridZ: 0, color: '#ff007f' },
             { gridX: -1, gridY: -1, gridZ: 0, color: '#ff4d94' },
@@ -1602,7 +1590,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             { gridX: 1,  gridY: -1, gridZ: 0, color: '#ff4d94' },
             { gridX: 2,  gridY: -1, gridZ: 0, color: '#ff007f' },
             { gridX: 3,  gridY: -1, gridZ: 0, color: '#a71d31' },
-            // Row 3
             { gridX: -3, gridY: 0, gridZ: 0, color: '#c9184a' },
             { gridX: -2, gridY: 0, gridZ: 0, color: '#ff007f' },
             { gridX: -1, gridY: 0, gridZ: 0, color: '#ff2a85' },
@@ -1610,20 +1597,15 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             { gridX: 1,  gridY: 0, gridZ: 0, color: '#ff2a85' },
             { gridX: 2,  gridY: 0, gridZ: 0, color: '#ff007f' },
             { gridX: 3,  gridY: 0, gridZ: 0, color: '#c9184a' },
-            // Row 4
             { gridX: -2, gridY: 1, gridZ: 0, color: '#a71d31' },
             { gridX: -1, gridY: 1, gridZ: 0, color: '#ff007f' },
             { gridX: 0,  gridY: 1, gridZ: 0, color: '#ff2a85' },
             { gridX: 1,  gridY: 1, gridZ: 0, color: '#ff007f' },
             { gridX: 2,  gridY: 1, gridZ: 0, color: '#a71d31' },
-            // Row 5
             { gridX: -1, gridY: 2, gridZ: 0, color: '#c9184a' },
             { gridX: 0,  gridY: 2, gridZ: 0, color: '#ff007f' },
             { gridX: 1,  gridY: 2, gridZ: 0, color: '#c9184a' },
-            // Row 6
             { gridX: 0,  gridY: 3, gridZ: 0, color: '#800f2f' },
-
-            // Layer 2 (3D Depth Plate Voxels)
             { gridX: -1, gridY: -2, gridZ: 1, color: '#ff4d94' },
             { gridX: 0,  gridY: -2, gridZ: 1, color: '#ffd700' },
             { gridX: 1,  gridY: -2, gridZ: 1, color: '#ff4d94' },
@@ -1638,8 +1620,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             { gridX: 0,  gridY: 1,  gridZ: 1, color: '#c9184a' }
         ];
 
-        // Prepare physical explosion trajectory vectors
-        const legoBlocks = heartGrid.map((b, i) => {
+        const legoBlocks = heartGrid.map((b) => {
             const angle = Math.atan2(b.gridY, b.gridX) + (Math.random() - 0.5) * 0.5;
             const dist = Math.hypot(b.gridX, b.gridY) + 1.5;
             const dirX = Math.cos(angle) * dist * 35 + (Math.random() - 0.5) * 40;
@@ -1656,7 +1637,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             };
         });
 
-        // Initialize Floating Debris & Dust Particles
         for (let i = 0; i < 40; i++) {
             legoDebris.push({
                 x: (Math.random() - 0.5) * 220,
@@ -1669,7 +1649,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             });
         }
 
-        // Color shader utilities for 3D Faces & Bevels
         function adjustColor(hex, lum) {
             hex = String(hex).replace(/[^0-9a-f]/gi, '');
             if (hex.length < 6) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
@@ -1683,13 +1662,12 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             return rgb;
         }
 
-        // Render Single 3D LEGO Brick (Isometric Perspective Canvas)
         function drawIsometricLegoBrick(ctx, x, y, sizeX, sizeY, height, color, rot = 0) {
             ctx.save();
             ctx.translate(x, y);
             if (rot !== 0) ctx.rotate(rot);
 
-            const ISO_ANGLE = 0.523598; // 30 deg in rad
+            const ISO_ANGLE = 0.523598;
             const cos = Math.cos(ISO_ANGLE);
             const sin = Math.sin(ISO_ANGLE);
 
@@ -1697,7 +1675,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             const leftColor = adjustColor(color, -0.15);
             const rightColor = adjustColor(color, -0.35);
 
-            // Isometric corners
             const pX0 = 0;
             const pY0 = -sizeY * sin;
             const pX1 = sizeX * cos;
@@ -1707,7 +1684,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             const pX3 = -sizeX * cos;
             const pY3 = 0;
 
-            // 1. Bottom Shadow
             ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
             ctx.beginPath();
             ctx.moveTo(pX0, pY0 + height + 6);
@@ -1717,7 +1693,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             ctx.closePath();
             ctx.fill();
 
-            // 2. Left Face
             ctx.fillStyle = leftColor;
             ctx.beginPath();
             ctx.moveTo(pX3, pY3);
@@ -1730,7 +1705,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             ctx.lineWidth = 0.5;
             ctx.stroke();
 
-            // 3. Right Face
             ctx.fillStyle = rightColor;
             ctx.beginPath();
             ctx.moveTo(pX1, pY1);
@@ -1741,7 +1715,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             ctx.fill();
             ctx.stroke();
 
-            // 4. Top Face
             ctx.fillStyle = topColor;
             ctx.beginPath();
             ctx.moveTo(pX0, pY0);
@@ -1752,19 +1725,16 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             ctx.fill();
             ctx.stroke();
 
-            // 5. LEGO Stud Connector (Round top knob)
             const studRadiusX = sizeX * 0.38;
             const studRadiusY = sizeY * 0.24;
             const studHeight = height * 0.28;
             const studYOffset = -sizeY * 0.1;
 
-            // Stud Shadow
             ctx.fillStyle = 'rgba(0,0,0,0.2)';
             ctx.beginPath();
             ctx.ellipse(0, studYOffset + 1, studRadiusX, studRadiusY, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // Stud Side
             ctx.fillStyle = adjustColor(color, 0.05);
             ctx.beginPath();
             ctx.ellipse(0, studYOffset - studHeight / 2, studRadiusX, studRadiusY, 0, 0, Math.PI);
@@ -1773,7 +1743,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             ctx.closePath();
             ctx.fill();
 
-            // Stud Top Face
             ctx.fillStyle = adjustColor(color, 0.35);
             ctx.beginPath();
             ctx.ellipse(0, studYOffset - studHeight, studRadiusX, studRadiusY, 0, 0, Math.PI * 2);
@@ -1784,7 +1753,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             ctx.restore();
         }
 
-        // Main Rendering Loop for 3D LEGO Heart Canvas
         let legoTime = 0;
 
         function animateLegoCanvas() {
@@ -1794,14 +1762,11 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
 
             legoTime += 0.03;
 
-            // Smoothly interpolate explosion progress
             const targetProg = legoExploded ? 1 : 0;
             legoExplodeProgress += (targetProg - legoExplodeProgress) * 0.12;
 
-            // Ambient gentle float/bobbing
             const floatOffset = Math.sin(legoTime * 1.5) * 4;
 
-            // Render Debris / Explosion Sparkles
             if (legoExplodeProgress > 0.05) {
                 legoDebris.forEach(p => {
                     const px = cx + p.x * legoExplodeProgress;
@@ -1816,14 +1781,12 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
                 legoCtx.globalAlpha = 1.0;
             }
 
-            // Sort Lego Bricks by Isometric Depth Z-Order for perfect overlapping
             const sortedBlocks = [...legoBlocks].sort((a, b) => {
                 const depthA = (a.gridY * 2) + (a.gridX) + (a.gridZ * 5);
                 const depthB = (b.gridY * 2) + (b.gridX) + (b.gridZ * 5);
                 return depthA - depthB;
             });
 
-            // Isometric scale & step factors
             const isoXStep = 17;
             const isoYStep = 10;
             const isoZStep = 14;
@@ -1832,11 +1795,9 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             const brickHeight = 10;
 
             sortedBlocks.forEach(b => {
-                // Base Isometric Position
                 let isoX = (b.gridX - b.gridY) * isoXStep;
                 let isoY = (b.gridX + b.gridY) * isoYStep - (b.gridZ * isoZStep);
 
-                // Add Explosion Physics Displacement
                 isoX += b.targetX * legoExplodeProgress;
                 isoY += (b.targetY - b.targetZ) * legoExplodeProgress;
 
@@ -1844,7 +1805,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
                 const curY = cy + isoY + floatOffset;
                 const curRot = b.rotX * legoExplodeProgress;
 
-                // Pulsing Highlight when assembled and hovering
                 let renderColor = b.color;
                 if (legoHovering && !legoExploded) {
                     renderColor = adjustColor(b.color, 0.15);
@@ -1856,7 +1816,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             requestAnimationFrame(animateLegoCanvas);
         }
 
-        // Toggle Explosion Action
         function toggleLegoExplode() {
             sfx.click();
             legoExploded = !legoExploded;
@@ -1968,7 +1927,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             legoCanvas.height = 240;
             animateLegoCanvas();
 
-            // Ambient Periodic Notifications
             setInterval(() => {
                 if (state.unlocked && Math.random() < 0.4) {
                     const msgs = [
