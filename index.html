@@ -60,7 +60,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons (Corregido con protocolo https seguro para GitHub Pages) -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <style>
@@ -72,7 +72,7 @@
 
         /* Glassmorphism Variants */
         .glass-cosmic {
-            background: rgba(12, 7, 30, 0.85);
+            background: rgba(12, 7, 30, 0.88);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(199, 125, 255, 0.25);
@@ -80,7 +80,7 @@
         }
 
         .glass-rosequartz {
-            background: rgba(255, 240, 243, 0.9);
+            background: rgba(255, 240, 243, 0.92);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 117, 143, 0.4);
@@ -219,10 +219,6 @@
                 <button id="themeToggleBtn" title="Cambiar Tema" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 transition-colors flex items-center space-x-1.5 active:scale-95">
                     <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
                     <span id="themeLabel" class="text-[10px] hidden md:inline font-mono">Cosmic Dark</span>
-                </button>
-
-                <button id="audioVisToggleBtn" title="Visualizador Espectro" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-cosmic-accent transition-colors active:scale-95">
-                    <i class="fa-solid fa-compact-disc text-xs"></i>
                 </button>
 
                 <div class="flex items-center space-x-1 font-mono text-[11px] text-slate-200 bg-black/40 px-2 py-1 rounded-md border border-white/10">
@@ -693,7 +689,7 @@
     <!-- NOTIFICATION TOAST CONTAINER -->
     <div id="toastContainer" class="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-50 flex flex-col space-y-2 pointer-events-none max-w-[calc(100vw-2rem)]"></div>
 
-    <!-- AUDIO SOURCE ENGINE (Con HTTPS estricto para evitar bloqueos en GitHub Pages) -->
+    <!-- AUDIO SOURCE ENGINE (Con HTTPS estricto para GitHub Pages)[span_0](start_span)[span_0](end_span) -->
     <audio id="audioSource" src="https://github.com/EndersonSivira/Poema-para-girlfriend/raw/main/Miki%20Matsubara%20-%20Stay%20With%20Me%20(Lyrics%20Espa%C3%B1ol)(M4A_128K).m4a" crossorigin="anonymous" preload="auto"></audio>
 
     <!-- CORE SYSTEM SCRIPT -->
@@ -779,18 +775,7 @@
             anniversaryStartDate: new Date('2026-10-05T00:00:00'),
             audioPlaying: false,
             customConstMode: false,
-            poemText: `Princesa Dennis,
-
-Hoy cumplimos nuestro primer mes oficial de novios.
-Desde el momento en que entraste en mi vida,
-el universo entero cobró un nuevo sentido.
-
-Gracias por cada risa compartida, por cada abrazo reconfortante,
-por tus palabras dulces y por ser la mejor novia del mundo.
-Eres mi refugio, mi sueño hecho realidad y mi mayor tesoro.
-
-Este Dennis OS es solo una pequeña muestra del amor infinito que te tengo.
-Feliz 1er Mes, Mi Novia Hermosa.`,
+            poemText: `Princesa Dennis,\n\nHoy cumplimos nuestro primer mes oficial de novios.\nDesde el momento en que entraste en mi vida,\nel universo entero cobró un nuevo sentido.\n\nGracias por cada risa compartida, por cada abrazo reconfortante,\npor tus palabras dulces y por ser la mejor novia del mundo.\nEres mi refugio, mi sueño hecho realidad y mi mayor tesoro.\n\nEste Dennis OS es solo una pequeña muestra del amor infinito que te tengo.\nFeliz 1er Mes, Mi Novia Hermosa.`,
             constellations: [
                 { id: 1, name: "Corazón", quote: "Tu amor es la razón principal de mi felicidad, Dennis.", x: 20, y: 30 },
                 { id: 2, name: "Promesa", quote: "Prometo cuidar tu corazón hoy y siempre, Princesa.", x: 35, y: 15 },
@@ -868,7 +853,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             }
         }
 
-        // Particle Burst on click / mouse move
         window.addEventListener('mousemove', (e) => {
             if (!state.unlocked) return;
             for (let i = 0; i < 2; i++) {
@@ -1017,7 +1001,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
                 triggerUnlock();
             } else {
                 sfx.click();
-                showNotification("Pin Incorrecto", "Pista: Dia y mes de nuestra primera interacción");
+                showNotification("Pin Incorrecto", "Pista: Día y mes de nuestra primera interacción");
             }
         });
 
@@ -1090,7 +1074,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             });
         }
 
-        // WINDOW MANAGEMENT (DRAG, Z-INDEX, MINIMIZE)
+        // WINDOW MANAGEMENT
         let activeZ = 100;
         const windows = document.querySelectorAll('.app-window');
 
@@ -1308,7 +1292,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             renderConstellations();
         });
 
-        // APP 3: AUDIO SANCTUARY ENGINE (Optimizado con Web Audio Analyser y manejo robusto de promesas)
+        // APP 3: AUDIO SANCTUARY ENGINE
         const audio = document.getElementById('audioSource');
         const mainPlayBtn = document.getElementById('mainPlayBtn');
         const hudPlayBtn = document.getElementById('hudPlayBtn');
@@ -1387,18 +1371,15 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
 
         mainSeekbar.addEventListener('input', (e) => {
             if (audio.duration) {
-                const seekTime = (e.target.value / 100) * audio.duration;
-                audio.currentTime = seekTime;
+                audio.currentTime = (e.target.value / 100) * audio.duration;
             }
         });
         hudSeekbar.addEventListener('input', (e) => {
             if (audio.duration) {
-                const seekTime = (e.target.value / 100) * audio.duration;
-                audio.currentTime = seekTime;
+                audio.currentTime = (e.target.value / 100) * audio.duration;
             }
         });
 
-        // Spectrum Equalizer Canvas
         function renderVisualizer() {
             visCtx.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
             const bars = 28;
@@ -1559,9 +1540,7 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
             initGame();
         });
 
-        // ==========================================
-        // ADVANCED ISOMETRIC 3D LEGO HEART SIMULATOR
-        // ==========================================
+        // ISOMETRIC 3D LEGO HEART SIMULATOR
         const legoCanvas = document.getElementById('legoCanvas');
         const legoCtx = legoCanvas.getContext('2d');
         const explodeLegoBtn = document.getElementById('explodeLegoBtn');
@@ -1830,7 +1809,6 @@ Feliz 1er Mes, Mi Novia Hermosa.`,
 
         legoCanvas.addEventListener('click', toggleLegoExplode);
         explodeLegoBtn.addEventListener('click', toggleLegoExplode);
-
         legoCanvas.addEventListener('mouseenter', () => legoHovering = true);
         legoCanvas.addEventListener('mouseleave', () => legoHovering = false);
 
