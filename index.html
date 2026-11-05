@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dennis OS • 1-Month Anniversary Edition</title>
+   
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cosmic: {
+                            950: '#06030e',
+                            900: '#0c071e',
+                            800: '#180d38',
+                            700: '#2a1659',
+                            500: '#9d4edd',
+                            400: '#c77dff',
+                            accent: '#ff007f',
+                            gold: '#ffd700'
+                        },
+                        rosequartz: {
+                            50: '#fff0f3',
+                            100: '#ffe3e8',
+                            200: '#ffccd5',
+                            400: '#ff758f',
+                            600: '#c9184a',
+                            gold: '#d4af37'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['Fira Code', 'monospace']
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2.5s ease-in-out infinite',
+                        'spin-slow': 'spin 14s linear infinite',
+                        'float-gentle': 'floatGentle 4s ease-in-out infinite'
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { filter: 'drop-shadow(0 0 15px rgba(255, 0, 127, 0.6))' },
+                            '50%': { filter: 'drop-shadow(0 0 32px rgba(199, 125, 255, 0.95))' }
+                        },
+                        floatGentle: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="h-screen w-screen overflow-hidden font-sans no-select bg-cosmic-950 text-slate-100 transition-colors duration-500">
+
+    <!-- CANVAS BACKGROUND MULTI-LAYER ENGINE -->
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+    <canvas id="fxCanvas" class="fixed inset-0 pointer-events-none z-10"></canvas>
+
+    <!-- 1. LOCK / WELCOME SCREEN -->
+    <div id="lockscreen" class="fixed inset-0 z-50 flex flex-col items-center justify-between p-4 md:p-6 bg-gradient-to-br from-cosmic-950 via-cosmic-900 to-black transition-all duration-1000 overflow-y-auto">
+        
+        <!-- Header Tag -->
+        <div class="mt-4 md:mt-8 text-center space-y-2 md:space-y-4 animate-float-gentle">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cosmic-500/20 border border-cosmic-400/40 text-cosmic-accent text-[10px] md:text-xs font-mono tracking-widest uppercase">
+                <i class="fa-solid fa-heart text-[10px] animate-pulse"></i>
+                <span>Edición Especial de Aniversario</span>
+            </div>
+            <h1 class="text-3xl md:text-6xl font-serif font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-rose-300 to-amber-200 drop-shadow-2xl px-2">
+                nosotros • 1er Mes de Novios
+            </h1>
+            <p class="text-slate-300 text-xs md:text-base font-light max-w-md mx-auto px-4">
+                Un portal estelar diseñado exclusivamente para celebrar nuestro primer mes juntos.
+            </p>
+        </div>
+
+        <!-- Central Interactive Unlock Hub -->
+        <div class="flex flex-col items-center space-y-4 md:space-y-6 my-auto w-full max-w-xs">
+            
+            <!-- Pin Pad Lock Simulation -->
+            <div id="pinBox" class="hidden w-full p-4 rounded-2xl glass-cosmic border border-white/10 text-center space-y-3">
+                <span class="text-xs font-mono text-pink-300 block">Introduce el Pin del Amor</span>
+                <div class="flex justify-center space-x-2">
+                    <input id="pinInput" type="password" maxlength="4" placeholder="••••" class="w-32 text-center bg-black/50 border border-pink-500/40 rounded-lg py-1.5 text-lg font-mono text-pink-300 focus:outline-none focus:border-pink-400">
+                </div>
+                <button id="pinSubmitBtn" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cosmic-accent to-cosmic-500 text-xs font-bold uppercase tracking-wider text-white shadow-lg active:scale-95 transition-transform">
+                    Verificar Pin
+                </button>
+            </div>
+
+            <!-- Biometric Button -->
+            <div id="unlockBtn" class="group relative cursor-pointer flex flex-col items-center active:scale-95 transition-transform">
+                <div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-tr from-cosmic-accent via-cosmic-500 to-amber-300 p-1 animate-pulse-glow">
+                    <div class="w-full h-full rounded-full bg-cosmic-950 flex flex-col items-center justify-center border border-white/20 space-y-1">
+                        <i class="fa-solid fa-fingerprint text-3xl md:text-4xl text-cosmic-accent group-hover:text-white transition-colors"></i>
+                        <span class="text-[9px] font-mono text-pink-300 uppercase">Desbloquear</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3 text-xs font-mono text-slate-400">
+                <button id="togglePinBtn" class="hover:text-pink-300 transition-colors underline py-1">
+                    Usar Pin
+                </button>
+                <span>•</span>
+                <button id="startAudioLockBtn" class="hover:text-amber-300 transition-colors flex items-center space-x-1 py-1">
+                    <i class="fa-solid fa-music text-pink-400"></i>
+                    <span>Iniciar con Música</span>
+                </button>
+            </div>
+
+            <div class="text-center font-mono text-xs text-slate-400">
+                <span id="lockClock">00:00:00</span> • <span id="lockDate">Cargando...</span>
+            </div>
+        </div>
+
+        <div class="text-[10px] md:text-[11px] font-mono text-slate-500 border-t border-white/5 pt-2 pb-1 w-full text-center">
+            Dennis OS v2.0 • Diseñado con todo el amor del mundo
+        </div>
+    </div>
+
+    <!-- MAIN OS DESKTOP CONTAINER -->
+    <div id="desktop" class="relative w-full h-full flex flex-col z-20 opacity-0 pointer-events-none transition-opacity duration-1000">
+
+        <!-- OS STATUS BAR -->
+        <header id="statusBar" class="h-11 w-full glass-cosmic flex items-center justify-between px-3 md:px-4 z-40 border-b border-white/10 text-xs font-medium shrink-0">
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <div class="flex items-center space-x-1.5 font-serif font-bold text-pink-300">
+                    <i class="fa-solid fa-crown text-amber-400 text-xs"></i>
+                    <span class="text-xs md:text-sm">Dennis OS</span>
+                </div>
+                <div class="hidden sm:flex items-center space-x-3 text-slate-300 text-xs border-l border-white/10 pl-3">
+                    <span><i class="fa-solid fa-heart text-rose-500 mr-1"></i> 1 Mes</span>
+                    <span id="anniversaryCounter" class="font-mono text-pink-300">00d 00h 00m 00s</span>
+                </div>
+            </div>
+
+            <!-- Right Status Bar Controls -->
+            <div class="flex items-center space-x-2 md:space-x-3">
+                <div class="hidden md:flex items-center space-x-1.5 text-[11px] text-slate-300 bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                    <i class="fa-solid fa-battery-full text-emerald-400"></i>
+                    <span>100% Amor</span>
+                </div>
+
+                <button id="themeToggleBtn" title="Cambiar Tema" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-amber-300 transition-colors flex items-center space-x-1.5 active:scale-95">
+                    <i id="themeIcon" class="fa-solid fa-moon text-xs"></i>
+                    <span id="themeLabel" class="text-[10px] hidden md:inline font-mono">Cosmic Dark</span>
+                </button>
+
+                <button id="audioVisToggleBtn" title="Visualizador Espectro" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-cosmic-accent transition-colors active:scale-95">
+                    <i class="fa-solid fa-compact-disc text-xs"></i>
+                </button>
+
+                <div class="flex items-center space-x-1 font-mono text-[11px] text-slate-200 bg-black/40 px-2 py-1 rounded-md border border-white/10">
+                    <i class="fa-regular fa-clock text-pink-400 text-[10px]"></i>
+                    <span id="osClock">--:--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- WORKSPACE AREA -->
+        <main id="workspace" class="relative flex-1 w-full overflow-hidden p-2 md:p-4">
+
+            <!-- FLOATING WIDGET: STATS CARD -->
+            <div class="absolute top-6 left-6 hidden lg:block w-72 glass-cosmic rounded-2xl p-4 border border-white/10 shadow-2xl pointer-events-auto glow-border">
+                <div class="flex items-center justify-between pb-2 border-b border-white/10 mb-3">
+                    <span class="text-xs font-serif font-bold text-pink-300 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-check text-cosmic-accent"></i>
+                        Contador de Novios
+                    </span>
+                    <span class="text-[10px] bg-pink-500/20 text-pink-300 px-2 py-0.5 rounded-full font-mono">1er Mes</span>
+                </div>
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span>Fecha Oficial:</span>
+                        <span class="font-mono text-amber-300">05 Oct, 2026</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span>Estado:</span>
+                        <span class="text-emerald-400 font-medium">Enamorado Totalmente</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span>Para:</span>
+                        <span class="text-pink-300 italic font-serif">Dennis, Mi Novia</span>
+                    </div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-white/10 text-[11px] text-slate-400 italic text-center">
+                    "Cada segundo a tu lado es una nueva estrella en nuestro universo."
+                </div>
+            </div>
+
+            <!-- AUDIO VISUALIZER HUD WIDGET -->
+            <div id="audioVisualizerHud" class="absolute top-2 right-2 md:top-6 md:right-6 hidden md:flex flex-col glass-cosmic rounded-2xl p-3 border border-pink-500/30 w-72 md:w-80 shadow-2xl z-20 transition-all duration-300">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-mono font-semibold text-pink-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wave-square text-cosmic-accent animate-pulse"></i>
+                        Espectro Estelar HUD
+                    </span>
+                    <button id="hudJumpBtn" class="text-[10px] bg-cosmic-400/20 hover:bg-cosmic-400/40 text-pink-300 px-2 py-0.5 rounded border border-pink-400/30 transition-all font-mono active:scale-95">
+                        <i class="fa-solid fa-forward-step mr-1"></i>1:00
+                    </button>
+                </div>
+                <canvas id="visualizerCanvas" class="w-full h-16 md:h-20 rounded-xl bg-black/50 border border-white/5 mb-2"></canvas>
+
+                <div class="flex items-center justify-between text-xs text-slate-300">
+                    <button id="hudPlayBtn" class="p-1 hover:text-pink-400 transition-colors">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <input id="hudSeekbar" type="range" min="0" max="100" value="0" class="w-24 md:w-28 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-pink-500">
+                    <span id="hudTime" class="font-mono text-[10px] text-pink-300">00:00</span>
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-solid fa-volume-high text-[10px]"></i>
+                        <input id="hudVolume" type="range" min="0" max="100" value="80" class="w-10 md:w-12 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-pink-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- WINDOW AREA (7 OS APPLICATIONS) -->
+            <div id="windowArea" class="relative w-full h-full pointer-events-none">
+
+                <!-- APP 1: CARTA & POEMA -->
+                <div id="win-poem" class="app-window absolute hidden pointer-events-auto top-2 left-2 md:top-8 md:left-16 w-full md:w-[700px] h-[calc(100%-1rem)] md:h-[540px] glass-cosmic rounded-2xl flex flex-col border border-pink-500/30 shadow-2xl overflow-hidden transition-all duration-300">
+                    <div class="app-header h-11 bg-black/60 px-3 md:px-4 flex items-center justify-between border-b border-white/10 cursor-move shrink-0">
+                        <div class="flex items-center space-x-2 text-xs font-serif font-bold text-pink-300 truncate">
+                            <i class="fa-solid fa-feather-pointed text-cosmic-accent shrink-0"></i>
+                            <span class="truncate">Carta & Poema • Para Mi Novia Dennis</span>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button class="win-btn-min p-2 text-slate-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <button class="win-btn-close p-2 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-sm"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 p-4 md:p-6 overflow-y-auto space-y-4 md:space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/10 pb-3 gap-2">
+                            <div>
+                                <h3 class="text-lg md:text-xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-rose-200 to-amber-200">
+                                    "Un Mes En Tu Galaxia"
+                                </h3>
+                                <p class="text-[11px] md:text-xs text-slate-400 font-mono">Poema de Aniversario para mi amor</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-[10px] font-mono text-slate-400">Velocidad:</label>
+                                <select id="typingSpeed" class="bg-black/50 text-xs border border-white/10 rounded px-2 py-1 text-pink-300 font-mono focus:outline-none">
+                                    <option value="40">Lenta</option>
+                                    <option value="20" selected>Normal</option>
+                                    <option value="5">Rápida</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="p-4 md:p-5 rounded-2xl bg-black/40 border border-white/10 font-serif text-slate-200 text-xs md:text-base leading-relaxed relative min-h-[180px] md:min-h-[220px]">
+                            <div id="poemTypewriter" class="whitespace-pre-line"></div>
+                            <span id="typewriterCursor" class="inline-block w-1.5 h-3.5 md:w-2 md:h-4 bg-pink-400 animate-pulse ml-0.5"></span>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
+                            <div class="grid grid-cols-3 sm:flex items-center gap-2">
+                                <button id="restartPoemBtn" class="px-2.5 py-2 rounded-xl bg-pink-500/20 hover:bg-pink-500/40 border border-pink-400/30 text-[11px] font-mono text-pink-300 transition-colors text-center active:scale-95">
+                                    <i class="fa-solid fa-rotate-right mr-1"></i>Re-escribir
+                                </button>
+                                <button id="copyPoemBtn" class="px-2.5 py-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-[11px] font-mono text-slate-300 transition-colors text-center active:scale-95">
+                                    <i class="fa-regular fa-copy mr-1"></i>Copiar
+                                </button>
+                                <button id="voiceoverBtn" class="px-2.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 text-[11px] font-mono text-amber-300 transition-colors text-center active:scale-95">
+                                    <i class="fa-solid fa-volume-high mr-1"></i>Audio
+                                </button>
+                            </div>
+                            <div class="text-right text-xs font-serif text-slate-400 italic">
+                                — Con todo mi corazón, tu novio.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APP 2: CONSTELACIONES ESTELARES -->
+                <div id="win-constellations" class="app-window absolute hidden pointer-events-auto top-2 left-2 md:top-6 md:left-20 w-full md:w-[840px] h-[calc(100%-1rem)] md:h-[580px] glass-cosmic rounded-2xl flex flex-col border border-pink-500/30 shadow-2xl overflow-hidden transition-all duration-300">
+                    <div class="app-header h-11 bg-black/60 px-3 md:px-4 flex items-center justify-between border-b border-white/10 cursor-move shrink-0">
+                        <div class="flex items-center space-x-2 text-xs font-serif font-bold text-pink-300 truncate">
+                            <i class="fa-solid fa-star text-amber-400 shrink-0"></i>
+                            <span class="truncate">Constelaciones Estelares • El Cielo de Dennis</span>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button class="win-btn-min p-2 text-slate-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <button class="win-btn-close p-2 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-sm"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+                        <div class="flex-1 relative bg-black/60 overflow-hidden min-h-[220px]">
+                            <svg id="constellationSvg" class="w-full h-full cursor-crosshair">
+                                <!-- Lines & Stars rendered via JS -->
+                            </svg>
+                            <div class="absolute bottom-2 left-2 right-2 md:right-auto flex items-center justify-between md:justify-start space-x-2 bg-black/75 backdrop-blur px-2.5 py-1.5 rounded-xl border border-white/10 text-[10px] md:text-[11px] font-mono text-slate-300">
+                                <button id="customConstModeBtn" class="px-2 py-1 rounded bg-cosmic-accent/30 text-pink-300 border border-pink-400/40 active:scale-95 shrink-0">
+                                    Modo Dibujar
+                                </button>
+                                <span class="truncate text-[9px] md:text-[10px]">Toca estrellas para ver mensajes</span>
+                            </div>
+                        </div>
+
+                        <div class="w-full md:w-72 bg-black/40 border-t md:border-t-0 md:border-l border-white/10 p-3 md:p-4 flex flex-col justify-between overflow-y-auto shrink-0 max-h-[40%] md:max-h-none">
+                            <div>
+                                <h4 class="text-xs md:text-sm font-serif font-bold text-pink-300 border-b border-white/10 pb-1.5 mb-2 md:mb-3">
+                                    <i class="fa-solid fa-compass text-amber-400 mr-1"></i> Detalles Celestes
+                                </h4>
+                                <div id="constellationDetails" class="p-2.5 md:p-3 rounded-xl bg-white/5 border border-white/10 text-xs space-y-1 md:space-y-2">
+                                    <p class="font-semibold text-amber-300 text-xs" id="constName">Selecciona una estrella</p>
+                                    <p class="text-slate-300 italic text-[11px] md:text-xs leading-relaxed" id="constQuote">Descubre las 15 constelaciones creadas durante nuestro primer mes juntos.</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 md:mt-4 space-y-1.5">
+                                <span class="text-[9px] md:text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Progreso de Descubrimiento</span>
+                                <div class="w-full bg-white/10 h-2 md:h-2.5 rounded-full overflow-hidden">
+                                    <div id="constProgress" class="bg-gradient-to-r from-pink-500 via-purple-400 to-amber-400 h-full w-0 transition-all duration-500"></div>
+                                </div>
+                                <div class="flex justify-between text-[10px] font-mono text-pink-300">
+                                    <span id="constUnlockedCount">0 / 15</span>
+                                    <span id="constPercent">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APP 3: REPRODUCTOR ESTELAR (AUDIO SANCTUARY) -->
+                <div id="win-audio" class="app-window absolute hidden pointer-events-auto top-2 left-2 md:top-10 md:left-40 w-full md:w-[620px] h-[calc(100%-1rem)] md:h-[520px] glass-cosmic rounded-2xl flex flex-col border border-pink-500/30 shadow-2xl overflow-hidden transition-all duration-300">
+                    <div class="app-header h-11 bg-black/60 px-3 md:px-4 flex items-center justify-between border-b border-white/10 cursor-move shrink-0">
+                        <div class="flex items-center space-x-2 text-xs font-serif font-bold text-pink-300 truncate">
+                            <i class="fa-solid fa-music text-pink-400 shrink-0"></i>
+                            <span class="truncate">Reproductor Estelar • Special Track</span>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button class="win-btn-min p-2 text-slate-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <button class="win-btn-close p-2 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-sm"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 p-4 md:p-6 flex flex-col justify-between overflow-y-auto space-y-3 md:space-y-0">
+                        <div class="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
+                            <!-- Spinning Vinyl Record -->
+                            <div class="relative w-28 h-28 md:w-36 md:h-36 shrink-0">
+                                <div id="vinylDisk" class="w-full h-full rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-black p-2 border-2 border-slate-700 shadow-2xl flex items-center justify-center transition-transform duration-700">
+                                    <div class="w-9 h-9 md:w-12 md:h-12 rounded-full bg-pink-600 border-4 border-slate-900 flex items-center justify-center">
+                                        <i class="fa-solid fa-heart text-white text-[10px] md:text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex-1 text-center sm:text-left space-y-1">
+                                <span class="text-[9px] md:text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">Miki Matsubara</span>
+                                <h3 class="text-lg md:text-xl font-serif font-bold text-slate-100">Stay With Me</h3>
+                                <p class="text-xs text-slate-400">Dedicada a Princesa Dennis</p>
+                                <p class="text-[10px] md:text-[11px] font-mono text-amber-300 pt-0.5">
+                                    <i class="fa-solid fa-star text-xs mr-1"></i> Nuestra Canción
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Synchronized Scrolling Lyrics -->
+                        <div class="my-2 md:my-4 p-3 md:p-4 rounded-2xl bg-black/50 border border-white/10 h-20 md:h-28 flex flex-col items-center justify-center text-center overflow-hidden">
+                            <p id="lyricsDisplay" class="font-serif italic text-xs md:text-base text-pink-200 transition-all duration-300 px-2">
+                                "Stay with me... 真夜中のドアをたたき, 帰らないでと泣いた..."
+                            </p>
+                        </div>
+
+                        <!-- Audio Controls -->
+                        <div class="space-y-2 md:space-y-3">
+                            <div class="flex items-center space-x-2 md:space-x-3">
+                                <span id="audioCurrentTime" class="font-mono text-[10px] md:text-xs text-slate-400">01:00</span>
+                                <input id="mainSeekbar" type="range" min="0" max="100" value="0" class="flex-1 h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-pink-500">
+                                <span id="audioDuration" class="font-mono text-[10px] md:text-xs text-slate-400">00:00</span>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-1">
+                                <button id="jumpSixtySecBtn" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 text-[11px] font-mono text-amber-300 active:scale-95">
+                                    <i class="fa-solid fa-forward-fast mr-1"></i>1:00
+                                </button>
+
+                                <div class="flex items-center space-x-4">
+                                    <button id="mainPlayBtn" class="w-11 h-11 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-cosmic-accent to-pink-500 text-white flex items-center justify-center text-base md:text-lg shadow-lg active:scale-95 transition-transform">
+                                        <i class="fa-solid fa-play"></i>
+                                    </button>
+                                </div>
+
+                                <div class="flex items-center space-x-1.5">
+                                    <i class="fa-solid fa-volume-high text-[10px] md:text-xs text-slate-400"></i>
+                                    <input id="mainVolume" type="range" min="0" max="100" value="80" class="w-16 md:w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-pink-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APP 4: JARDÍN DE RECUERDOS -->
+                <div id="win-memories" class="app-window absolute hidden pointer-events-auto top-2 left-2 md:top-8 md:left-28 w-full md:w-[760px] h-[calc(100%-1rem)] md:h-[550px] glass-cosmic rounded-2xl flex flex-col border border-pink-500/30 shadow-2xl overflow-hidden transition-all duration-300">
+                    <div class="app-header h-11 bg-black/60 px-3 md:px-4 flex items-center justify-between border-b border-white/10 cursor-move shrink-0">
+                        <div class="flex items-center space-x-2 text-xs font-serif font-bold text-pink-300 truncate">
+                            <i class="fa-solid fa-book-bookmark text-amber-400 shrink-0"></i>
+                            <span class="truncate">Jardín de Recuerdos • Nuestro Primer Mes</span>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button class="win-btn-min p-2 text-slate-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <button class="win-btn-close p-2 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-sm"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 p-4 md:p-6 overflow-y-auto space-y-4 md:space-y-6">
+                        <div class="flex items-center justify-between border-b border-white/10 pb-3 gap-2">
+                            <div class="flex items-center space-x-1.5 overflow-x-auto py-1 max-w-[75%]">
+                                <button class="mem-filter font-mono text-[11px] px-2.5 py-1 rounded-full bg-pink-500 text-white shrink-0" data-filter="all">Todos</button>
+                                <button class="mem-filter font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-slate-300 shrink-0" data-filter="citas">Citas</button>
+                                <button class="mem-filter font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-slate-300 shrink-0" data-filter="detalles">Detalles</button>
+                                <button class="mem-filter font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-slate-300 shrink-0" data-filter="promesas">Promesas</button>
+                            </div>
+                            <button id="addMemoryNoteBtn" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-mono shrink-0 active:scale-95">
+                                + Nota
+                            </button>
+                        </div>
+
+                        <!-- Timeline List -->
+                        <div id="memoryTimeline" class="space-y-3 md:space-y-4 relative border-l-2 border-pink-500/30 pl-4 md:pl-6 ml-2 md:ml-3">
+                            <!-- Cards inserted dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APP 5: CORAZÓN LEGO 3D & MINI-JUEGOS -->
+                <div id="win-game" class="app-window absolute hidden pointer-events-auto top-2 left-2 md:top-6 md:left-16 w-full md:w-[820px] h-[calc(100%-1rem)] md:h-[580px] glass-cosmic rounded-2xl flex flex-col border border-pink-500/30 shadow-2xl overflow-hidden transition-all duration-300">
+                    <div class="app-header h-11 bg-black/60 px-3 md:px-4 flex items-center justify-between border-b border-white/10 cursor-move shrink-0">
+                        <div class="flex items-center space-x-2 text-xs font-serif font-bold text-pink-300 truncate">
+                            <i class="fa-solid fa-gamepad text-emerald-400 shrink-0"></i>
+                            <span class="truncate">Corazón LEGO 3D & Parejas • Para Dennis</span>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button class="win-btn-min p-2 text-slate-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <button class="win-btn-close p-2 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-sm"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
+                        <!-- Memory Card Game -->
+                        <div class="flex-1 p-3 md:p-4 flex flex-col justify-between border-b md:border-b-0 md:border-r border-white/10 bg-black/20 shrink-0 md:shrink">
+                            <div class="flex items-center justify-between text-xs font-mono mb-2 md:mb-3">
+                                <span class="text-pink-300 text-[11px]">Movs: <strong id="gameMoves" class="text-white">0</strong></span>
+                                <span class="text-amber-300 text-[11px]">Tiempo: <strong id="gameTimer" class="text-white">00:00</strong></span>
+                                <button id="restartGameBtn" class="px-2 py-0.5 rounded-lg bg-pink-500/20 text-pink-300 border border-pink-400/30 text-[11px] active:scale-95">Reiniciar</button>
+                            </div>
+
+                            <div id="cardGrid" class="grid grid-cols-4 gap-1.5 md:gap-2 flex-1 items-center justify-center p-1 min-h-[180px]">
+                                <!-- Cards rendered via JS -->
+                            </div>
+                        </div>
+
+                        <!-- 3D Lego Canvas Side -->
+                        <div class="w-full md:w-80 p-3 md:p-4 bg-black/40 flex flex-col items-center justify-between shrink-0">
+                            <div class="text-center">
+                                <h4 class="text-xs font-serif font-bold text-pink-300">Corazón LEGO 3D Explosivo</h4>
+                                <p class="text-[10px] text-slate-400">Toca el corazón para explotar/reensamblar</p>
+                            </div>
+
+                            <canvas id="legoCanvas" class="w-full h-48 md:h-64 rounded-xl border border-white/10 my-2 cursor-pointer shadow-inner"></canvas>
+
+                            <button id="explodeLegoBtn" class="w-full py-2 rounded-xl bg-pink-500/20 hover:bg-pink-500/40 text-pink-300 text-xs font-mono border border-pink-400/30 transition-all active:scale-95">
+                                💥 Explotar / Armar LEGO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APP 6: RULETA DE CUMPLIDOS & GALLETA DE LA FORTUNA -->
+                <div id="win-compliments" class="app-window absolute hidden pointer-events-auto top-2 left-2 md:top-12 md:left-36 w-full md:w-[600px] h-[calc(100%-1rem)] md:h-[520px] glass-cosmic rounded-2xl flex flex-col border border-pink-500/30 shadow-2xl overflow-hidden transition-all duration-300">
+                    <div class="app-header h-11 bg-black/60 px-3 md:px-4 flex items-center justify-between border-b border-white/10 cursor-move shrink-0">
+                        <div class="flex items-center space-x-2 text-xs font-serif font-bold text-pink-300 truncate">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-300 shrink-0"></i>
+                            <span class="truncate">Ruleta de Cumplidos & Galleta • Dennis</span>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button class="win-btn-min p-2 text-slate-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <button class="win-btn-close p-2 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-sm"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 p-4 md:p-6 flex flex-col items-center justify-between text-center overflow-y-auto space-y-3 md:space-y-4">
+                        <div class="space-y-0.5">
+                            <h3 class="text-base md:text-lg font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-rose-200 to-amber-200">
+                                Rueda de Amor & Galleta Fortuna
+                            </h3>
+                            <p class="text-[11px] md:text-xs text-slate-400">Descubre un motivo más para sonreír, Princesa</p>
+                        </div>
+
+                        <!-- Wheel Canvas -->
+                        <div class="relative w-36 h-36 md:w-44 md:h-44 my-1 shrink-0">
+                            <canvas id="wheelCanvas" class="w-full h-full rounded-full shadow-2xl"></canvas>
+                            <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 text-amber-400 text-lg md:text-xl">
+                                <i class="fa-solid fa-caret-down"></i>
+                            </div>
+                        </div>
+
+                        <!-- Compliment Output Box -->
+                        <div id="complimentBox" class="p-3 rounded-xl bg-black/40 border border-white/10 w-full min-h-[60px] md:min-h-[70px] flex items-center justify-center">
+                            <p class="font-serif italic text-xs md:text-sm text-pink-200">
+                                Girar rueda o abrir galleta para ver tu secreto amoroso...
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 md:gap-3 w-full shrink-0">
+                            <button id="spinWheelBtn" class="py-2.5 rounded-xl bg-gradient-to-r from-cosmic-accent to-pink-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg active:scale-95">
+                                🔮 Girar Rueda
+                            </button>
+                            <button id="openFortuneBtn" class="py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-pink-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg active:scale-95">
+                                🥠 Abrir Galleta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APP 7: CALCULADORA DE AMOR & CONTADOR DE DÍAS -->
+                <div id="win-calculator" class="app-window absolute hidden pointer-events-auto top-2 left-2 md:top-10 md:left-44 w-full md:w-[560px] h-[calc(100%-1rem)] md:h-[480px] glass-cosmic rounded-2xl flex flex-col border border-pink-500/30 shadow-2xl overflow-hidden transition-all duration-300">
+                    <div class="app-header h-11 bg-black/60 px-3 md:px-4 flex items-center justify-between border-b border-white/10 cursor-move shrink-0">
+                        <div class="flex items-center space-x-2 text-xs font-serif font-bold text-pink-300 truncate">
+                            <i class="fa-solid fa-calculator text-rose-400 shrink-0"></i>
+                            <span class="truncate">Calculadora de Amor • Días Juntos</span>
+                        </div>
+                        <div class="flex items-center space-x-1 shrink-0">
+                            <button class="win-btn-min p-2 text-slate-400 hover:text-white"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <button class="win-btn-close p-2 text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-sm"></i></button>
+                        </div>
+                    </div>
+                    <div class="flex-1 p-4 md:p-6 flex flex-col justify-between overflow-y-auto space-y-4">
+                        <div class="text-center space-y-0.5">
+                            <h3 class="text-base md:text-lg font-serif font-bold text-pink-300">Tiempo de Novios Oficiales</h3>
+                            <p class="text-[11px] md:text-xs text-slate-400 font-mono">Desde el 05 de octubre del 2026</p>
+                        </div>
+
+                        <!-- Detailed Time Counters Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 text-center">
+                            <div class="p-2.5 md:p-3 rounded-xl bg-black/40 border border-white/10">
+                                <span id="calcDays" class="block text-xl md:text-2xl font-mono font-bold text-pink-400">00</span>
+                                <span class="text-[9px] md:text-[10px] font-mono text-slate-400 uppercase">Días</span>
+                            </div>
+                            <div class="p-2.5 md:p-3 rounded-xl bg-black/40 border border-white/10">
+                                <span id="calcHours" class="block text-xl md:text-2xl font-mono font-bold text-amber-300">00</span>
+                                <span class="text-[9px] md:text-[10px] font-mono text-slate-400 uppercase">Horas</span>
+                            </div>
+                            <div class="p-2.5 md:p-3 rounded-xl bg-black/40 border border-white/10">
+                                <span id="calcMins" class="block text-xl md:text-2xl font-mono font-bold text-purple-300">00</span>
+                                <span class="text-[9px] md:text-[10px] font-mono text-slate-400 uppercase">Minutos</span>
+                            </div>
+                            <div class="p-2.5 md:p-3 rounded-xl bg-black/40 border border-white/10">
+                                <span id="calcSecs" class="block text-xl md:text-2xl font-mono font-bold text-emerald-400">00</span>
+                                <span class="text-[9px] md:text-[10px] font-mono text-slate-400 uppercase">Segundos</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 md:p-4 rounded-xl bg-white/5 border border-white/10 space-y-2 text-xs">
+                            <div class="flex justify-between text-slate-300 text-[11px] md:text-xs">
+                                <span>Porcentaje del Primer Mes:</span>
+                                <span class="text-emerald-400 font-mono">100% Completado</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-pink-500 to-emerald-400 h-full w-full"></div>
+                            </div>
+                            <p class="text-[10px] md:text-[11px] text-slate-400 italic text-center pt-1">
+                                "El primer mes de infinitos que vendrán a tu lado, Dennis."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- OS SYSTEM DOCK (7 APPLICATIONS) -->
+        <footer class="h-16 md:h-20 w-full flex items-center justify-center pb-2 md:pb-3 z-40 shrink-0 px-2">
+            <div class="glass-cosmic px-3 md:px-4 py-1.5 md:py-2.5 rounded-2xl flex items-center space-x-2.5 md:space-x-5 border border-white/15 shadow-2xl glow-border max-w-full overflow-x-auto">
+
+                <!-- Dock 1: Poema -->
+                <button class="dock-app group relative p-2 md:p-3 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 transition-all active:scale-95 shrink-0" data-target="win-poem" title="Carta & Poema">
+                    <i class="fa-solid fa-feather-pointed text-xl md:text-2xl text-pink-400 group-hover:text-pink-300 transition-colors"></i>
+                    <span class="hidden md:block absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-pink-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Poema</span>
+                </button>
+
+                <!-- Dock 2: Constelaciones -->
+                <button class="dock-app group relative p-2 md:p-3 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 transition-all active:scale-95 shrink-0" data-target="win-constellations" title="Constelaciones">
+                    <i class="fa-solid fa-star text-xl md:text-2xl text-amber-400 group-hover:text-amber-300 transition-colors"></i>
+                    <span class="hidden md:block absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-amber-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Constelaciones</span>
+                </button>
+
+                <!-- Dock 3: Audio Sanctuary -->
+                <button class="dock-app group relative p-2 md:p-3 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 transition-all active:scale-95 shrink-0" data-target="win-audio" title="Reproductor Estelar">
+                    <i class="fa-solid fa-music text-xl md:text-2xl text-purple-400 group-hover:text-purple-300 transition-colors"></i>
+                    <span class="hidden md:block absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-purple-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Música</span>
+                </button>
+
+                <!-- Dock 4: Recuerdos -->
+                <button class="dock-app group relative p-2 md:p-3 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 transition-all active:scale-95 shrink-0" data-target="win-memories" title="Jardín de Recuerdos">
+                    <i class="fa-solid fa-book-bookmark text-xl md:text-2xl text-rose-400 group-hover:text-rose-300 transition-colors"></i>
+                    <span class="hidden md:block absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-rose-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Recuerdos</span>
+                </button>
+
+                <!-- Dock 5: LEGO 3D & Juegos -->
+                <button class="dock-app group relative p-2 md:p-3 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 transition-all active:scale-95 shrink-0" data-target="win-game" title="LEGO 3D & Minijuegos">
+                    <i class="fa-solid fa-gamepad text-xl md:text-2xl text-emerald-400 group-hover:text-emerald-300 transition-colors"></i>
+                    <span class="hidden md:block absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-emerald-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">LEGO 3D</span>
+                </button>
+
+                <!-- Dock 6: Cumplidos -->
+                <button class="dock-app group relative p-2 md:p-3 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 transition-all active:scale-95 shrink-0" data-target="win-compliments" title="Cumplidos & Galleta">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xl md:text-2xl text-yellow-300 group-hover:text-yellow-200 transition-colors"></i>
+                    <span class="hidden md:block absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-yellow-200 font-mono opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Cumplidos</span>
+                </button>
+
+                <!-- Dock 7: Calculadora -->
+                <button class="dock-app group relative p-2 md:p-3 rounded-xl bg-white/5 hover:bg-pink-500/20 border border-white/10 transition-all active:scale-95 shrink-0" data-target="win-calculator" title="Calculadora de Amor">
+                    <i class="fa-solid fa-calculator text-xl md:text-2xl text-rose-300 group-hover:text-white transition-colors"></i>
+                    <span class="hidden md:block absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-black/80 text-[10px] text-rose-300 font-mono opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Calculadora</span>
+                </button>
+
+            </div>
+        </footer>
+    </div>
+
+    <!-- NOTIFICATION TOAST CONTAINER -->
+    <div id="toastContainer" class="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-50 flex flex-col space-y-2 pointer-events-none max-w-[calc(100vw-2rem)]"></div>
+
+    <!-- AUDIO SOURCE ENGINE -->
+    <audio id="audioSource" src="https://github.com/EndersonSivira/Poema-para-girlfriend/raw/main/Miki%20Matsubara%20-%20Stay%20With%20Me%20(Lyrics%20Espa%C3%B1ol)(M4A_128K).m4a" crossorigin="anonymous" preload="auto"></audio>
+
+    <!-- CORE SYSTEM SCRIPT -->
+    <script src="script.js"></script>
+</body>
+</html>
